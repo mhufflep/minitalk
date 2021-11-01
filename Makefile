@@ -3,6 +3,7 @@
 LIBFT_DIR = libft
 CLIENT_DIR = client
 SERVER_DIR = server
+
 ROOT_DIR = $(shell pwd)
 
 export LIBFT_DIR

@@ -2,7 +2,7 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
-INCLUDE = -I ${ROOT_DIR}/${LIBFT_DIR}
+INCLUDE = -I ../libft
 
 NAME = client
 
@@ -19,7 +19,7 @@ obj_dir:
 	@if ! [ -d "${OBJ_DIR}" ] ; then mkdir ${OBJ_DIR} ; fi
 
 $(NAME): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $@ -L ${ROOT_DIR}/${LIBFT_DIR} -lft
+	$(CC) $(CFLAGS) $^ -o $@ -L ../libft -lft
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $? $(INCLUDE) -o $@
