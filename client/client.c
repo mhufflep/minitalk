@@ -57,14 +57,14 @@ void send_bit(pid_t pid, char c)
 	{
 		if (kill(pid, SIGUSR1))
 		{
-			ft_putendl_fd("kill error", 2);
+			ft_putendl_fd("Cannot send signal SIGUSR1", 2);
 		}
 	}
 	else
 	{
 		if (kill(pid, SIGUSR2))
 		{
-			ft_putendl_fd("kill error", 2);
+			ft_putendl_fd("Cannot send signal SIGUSR2", 2);
 		}
 	}
 }
