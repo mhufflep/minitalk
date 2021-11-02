@@ -33,21 +33,27 @@ int main()
 	ft_putnbr_fd(getpid(), 1);
 	ft_putstr_fd("\n", 1);
 
-	sigemptyset(&act.sa_mask);
-	
 	act.sa_flags = SA_SIGINFO;
 	act.sa_sigaction = receiver;
-
+	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGUSR1);
 	sigaddset(&act.sa_mask, SIGUSR2);
 
 	if (sigaction(SIGUSR1, &act, 0))
+	{
 		ft_putendl_fd("Error: sigaction failed", 2);
+		return (1);
+	}
+
 	if (sigaction(SIGUSR2, &act, 0))
+	{
 		ft_putendl_fd("Error: sigaction failed", 2);
+		return (1);
+	}
 
 	while (1)
+	{
 		usleep(50);
-
+	}
     return (0);
 }
