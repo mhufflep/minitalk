@@ -50,6 +50,6 @@ int send(t_data *data, char *msg)
 		i++;
 	}
 	send_sym(data, '\0');
-	ft_putendl_fd(" bits sended!", 1);
+	ft_putendl_fd(" bits sent!", 1);
 	return (0);
 }
