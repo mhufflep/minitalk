@@ -1,7 +1,7 @@
 #include "client.h"
 
-long long g_cur = 0;
-long long g_len = 0;
+#define ADD_BIT -1
+#define GET_CUR -2
 
 int	atoui(char *s, unsigned int *num)
 {
@@ -25,29 +25,62 @@ int	atoui(char *s, unsigned int *num)
 	return (0);
 }
 
+int track_len(long long arg) {
+
+	static long long num = 0;
+	static long long len = 0;
+
+	if (arg == GET_CUR)
+	{
+		return num;
+	}
+
+	if (arg != ADD_BIT)
+	{
+		len = arg;
+		return 0;
+	}
+
+	num++;
+
+	ft_putchar_fd('\r', 1);
+	ft_putnbr_fd(num, 1);
+	ft_putchar_fd('/', 1);
+	ft_putnbr_fd(len, 1);
+
+	return (num == len);
+}
+
 void send_bit(pid_t pid, char c)
 {
 	if (c & 1)
 	{
 		if (kill(pid, SIGUSR1))
+		{
 			ft_putendl_fd("kill error", 2);
+		}
 	}
 	else
 	{
 		if (kill(pid, SIGUSR2))
+		{
 			ft_putendl_fd("kill error", 2);
+		}
 	}
-	usleep(200);
 }
 
 void send_sym(pid_t pid, char c)
 {
 	int j;
+	int tmp;
 
 	j = 7;
 	while (j >= 0)
 	{
+		tmp = track_len(GET_CUR);
 		send_bit(pid, (c >> j) & 1);
+		while (tmp == track_len(GET_CUR))
+			usleep(100);
 		j--;
 	}
 }
@@ -66,17 +99,15 @@ int send(pid_t pid, char *msg)
 	return (0);
 }
 
-void	receiver(int signum)
+void	receiver(int signum, siginfo_t *info, void *unused)
 {
-	if (signum == SIGUSR2) {
-		g_cur += 8;
-		ft_putchar_fd('\r', 1);
-		ft_putnbr_fd(g_cur, 1);
-		ft_putchar_fd('/', 1);
-		ft_putnbr_fd(g_len, 1);
+	(void)info;
+	(void)unused;
+
+	if (signum == SIGUSR1) {
+		track_len(ADD_BIT);
 	}
 }
-
 
 int main(int argc, char **argv)
 {
@@ -97,24 +128,20 @@ int main(int argc, char **argv)
 	}
 
 	sigemptyset(&act.sa_mask);
-	sigaddset(&act.sa_mask, SIGUSR2);
+	sigaddset(&act.sa_mask, SIGUSR1);
 
 	act.sa_flags = SA_SIGINFO;
-	act.sa_handler = receiver;
-	if (sigaction(SIGUSR2, &act, 0))
+	act.sa_sigaction = receiver;
+	if (sigaction(SIGUSR1, &act, 0))
 	{
 		ft_putendl_fd("Error: sigaction failed", 2);
 		return (1);
 	}
 
-	g_len = (ft_strlen(argv[2]) + 1) * 8;
-	//long long cur = 0;
+	track_len((ft_strlen(argv[2]) + 1) * 8);
+
 	send(pid, argv[2]);
 
-	//receive signal back from server
-	while (g_cur != g_len) {
-		//usleep(100);
-	}
 	ft_putendl_fd(" bits sended!", 1);
 
     return (0);

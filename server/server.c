@@ -1,41 +1,27 @@
 #include "server.h"
 
-//◦ signal
-//◦ sigemptyset
-//◦ sigaddset
-//◦ sigaction
-
-#define BUF_SIZE 1
-
 void	receiver(int signum, siginfo_t *info, void *unused)
 {
 	(void)unused;
-	(void)info;
 
-	static char buf[BUF_SIZE] = {0};
-	static int power = 0;
-	static int i = 0;
+	static char symbol = 0;
+	static int shift = 0;
 
 	if (signum == SIGUSR1)
 	{
-		buf[0] |= 1 << (7 - power);
+		symbol |= 1 << (7 - shift);
 	}
 
-	if (++power == 8)
+ 	if (++shift == 8)
 	{
-		i++;
+		write(1, &symbol, 1);
+		symbol = 0;	
+		shift = 0;
+	}
 
-		if (buf[i - 1] == '\0' || i == BUF_SIZE)
-		{
-			write(1, buf, ft_strlen(buf));
-			ft_memset(buf, 0, BUF_SIZE);
-			i = 0;
-		}
-	
-		if (kill(info->si_pid, SIGUSR2))
-			ft_putendl_fd("kill error", 2);
-		
-		power = 0;
+	if (kill(info->si_pid, SIGUSR1))
+	{
+		ft_putendl_fd("Cannot send signal back", 2);
 	}
 }
 
@@ -61,7 +47,7 @@ int main()
 		ft_putendl_fd("Error: sigaction failed", 2);
 
 	while (1)
-		;
+		usleep(50);
 
     return (0);
 }
